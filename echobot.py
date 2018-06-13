@@ -3,7 +3,7 @@ import requests
 import time
 import urllib
 
-
+#API token will be provided by telegram
 TOKEN = "<ENTER API TOKEN HERE>"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
@@ -13,13 +13,13 @@ def get_url(url):
     content = response.content.decode("utf8")
     return content
 
-
+##receives the updates as json from telegram api
 def get_json_from_url(url):
     content = get_url(url)
     js = json.loads(content)
     return js
 
-
+##uses the telegram api to get updates
 def get_updates(offset=None):
     url = URL + "getUpdates?timeout=100"
     if offset:
@@ -27,7 +27,7 @@ def get_updates(offset=None):
     js = get_json_from_url(url)
     return js
 
-
+##function to identify the specific chat
 def get_last_chat_id_and_text(updates):
     num_updates = len(updates["result"])
     last_update = num_updates - 1
@@ -35,19 +35,20 @@ def get_last_chat_id_and_text(updates):
     chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return (text, chat_id)
 
-
+## function that sends text to users
 def send_message(text, chat_id):
     text = urllib.parse.quote_plus(text)
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     get_url(url)
     
-
+##to get the last sent message
 def get_last_update_id(updates):
     update_ids = []
     for update in updates["result"]:
         update_ids.append(int(update["update_id"]))
     return max(update_ids)
 
+##function that echoes back messages
 def echo_all(updates):
     for update in updates["result"]:
         try:
@@ -56,6 +57,8 @@ def echo_all(updates):
             send_message(text, chat)
         except Exception as e:
             print(e)
+
+
 
 def main():
     last_update_id = None
